@@ -1,0 +1,31 @@
+name: linting
+
+on:
+  push:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Get versions from .versions file
+        run: |
+          echo "PYTHON_VERSION=$(grep '^PYTHON_VERSION' .github/.versions | cut -d'=' -f2)" >> $GITHUB_ENV
+          echo "POETRY_VERSION=$(grep '^POETRY_VERSION' .github/.versions | cut -d'=' -f2)" >> $GITHUB_ENV
+        shell: bash
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Display Python version
+        run: |
+          echo "Python version: $PYTHON_VERSION"
+
+      - name: run pre-commit
+        uses: pre-commit/action@v3.0.0
+        with:
+          extra_args: --all-files
