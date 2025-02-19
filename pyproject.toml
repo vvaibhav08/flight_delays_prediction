@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "credit_application_project"
+name = "flight_delay_prediction_project"
 version = "0.1.0"
 description = "Credit application predictive analysis for ABN AMRO DSI case study"
 authors = ["Vaibhav Vaidya <vaibhavvinayak08@gmail.com>"]

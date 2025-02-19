@@ -2,65 +2,71 @@ from enum import StrEnum
 
 
 class RawFeatures(StrEnum):
-    TOTAL_NR_TRX = "total_nr_trx"
-    NR_DEBIT_TRX = "nr_debit_trx"
-    VOLUME_DEBIT_TRX = "volume_debit_trx"
-    NR_CREDIT_TRX = "nr_credit_trx"
-    VOLUME_CREDIT_TRX = "volume_credit_trx"
-    MIN_BALANCE = "min_balance"
-    MAX_BALANCE = "max_balance"
-    CRG = "CRG"
-    CLIENT_NR = "client_nr"
-    YEARMONTH = "yearmonth"
-    _CREDIT_APPLICATION = "credit_application"  # naming differently cause it be the target
-    NR_CREDIT_APPLICATIONS = "nr_credit_applications"
+    AIRLINE_CODE = "airlineCode"
+    ESTIMATED_LANDING_TIME = "estimatedLandingTime"
+    EXPECTED_TIME_BOARDING = "expectedTimeBoarding"
+    EXPECTED_TIME_GATE_CLOSING = "expectedTimeGateClosing"
+    EXPECTED_TIME_GATE_OPEN = "expectedTimeGateOpen"
+    EXPECTED_TIME_ON_BELT = "expectedTimeOnBelt"
+    FLIGHT_DIRECTION = "flightDirection"
+    FLIGHT_NAME = "flightName"
+    FLIGHT_NUMBER = "flightNumber"
+    GATE = "gate"
+    MAIN_FLIGHT = "mainFlight"
+    PREFIX_IATA = "prefixIATA"
+    PREFIX_ICAO = "prefixICAO"
+    PUBLIC_ESTIMATED_OFF_BLOCK_TIME = "publicEstimatedOffBlockTime"
+    PUBLIC_FLIGHT_STATE = "publicFlightState.flightStates"
+    ROUTE_DESTINATIONS = "route.destinations"
+    SCHEDULE_DATE = "scheduleDate"
+    SCHEDULE_TIME = "scheduleTime"
+    SERVICE_TYPE = "serviceType"
+    TERMINAL = "terminal"
+    TRANSFER_POSITIONS = "transferPositions"
+    SCHEDULED_DEPARTURE = "scheduledDeparture"
+    DELAY_MINUTES = "delay_minutes"
+    DELAY_MINUTES_LOG = "delay_minutes_log"
+    NUM_DESTINATIONS = "num_destinations"
+    FIRST_DESTINATION = "first_destination"
+    AIRPORT = "Airport"
+    NAME = "Name"
+    CITY = "City"
+    COUNTRY = "Country"
+    LATITUDE = "Latitude"
+    LONGITUDE = "Longitude"
+    ALTITUDE = "Altitude"
+    TIMEZONE = "Timezone"
+    DST = "DST"
+    TZ = "Tz"
+    TYPE = "Type"
+    SOURCE = "Source"
+    REGION = "region"
+    LOG_DELAY = "log_delay"
+    HOUR = "hour"
+    DAY_OF_WEEK = "day_of_week"
+    DELAY_PREVIOUS_HOUR = "delay_previous_hour"
+    DELAY_PREVIOUS_DAY = "delay_previous_day"
+    _DELAY_TARGET = "delay_target"
 
 
 class AggregatedFeatures(StrEnum):
-    MONTHLY_NET_VOLUME = "net_volume"
-    MONTHLY_DEBIT_TOTAL_TRX_RATIO = "debit_total_trx_ratio"
-    MONTHLY_DEBIT_TOTAL_VOL_RATIO = "debit_total_vol_ratio"
-    MONTHLY_BALANCE_RANGE = "balance_range"
-
-    # lag features
-    MONTHLY_BALANCE_RANGE_LAG1 = "balance_range_lag1"
-    MONTHLY_BALANCE_RANGE_LAG2 = "balance_range_lag2"
-    MONTHLY_NET_VOLUME_LAG1 = "net_volume_lag1"
-    MONTHLY_NET_VOLUME_LAG2 = "net_volume_lag2"
-    MONTHLY_MIN_BALANCE_LAG1 = "min_balance_lag1"
-    MONTHLY_MIN_BALANCE_LAG2 = "min_balance_lag2"
-    MONTHLY_DEBIT_TOTAL_TRX_RATIO_LAG1 = "debit_total_trx_ratio_lag1"
-    MONTHLY_DEBIT_TOTAL_TRX_RATIO_LAG2 = "debit_total_trx_ratio_lag2"
-    MONTHLY_DEBIT_TOTAL_VOL_RATIO_LAG1 = "debit_total_vol_ratio_lag1"
-    MONTHLY_DEBIT_TOTAL_VOL_RATIO_LAG2 = "debit_total_vol_ratio_lag2"
-
-    # rolling average features
-    MONTHLY_NET_VOLUME_ROLLING2 = "net_volume_rolling2"
-    MONTHLY_NET_VOLUME_ROLLING4 = "net_volume_rolling4"
-    MONTHLY_BALANCE_RANGE_ROLLING2 = "balance_range_rolling2"
-    MONTHLY_BALANCE_RANGE_ROLLING4 = "balance_range_rolling4"
-    MONTHLY_MIN_BALANCE_ROLLING2 = "min_balance_rolling2"
-    MONTHLY_MIN_BALANCE_ROLLING4 = "min_balance_rolling4"
-    MONTHLY_DEBIT_TOTAL_TRX_RATIO_ROLLING2 = "debit_total_trx_ratio_rolling2"
-    MONTHLY_DEBIT_TOTAL_TRX_RATIO_ROLLING4 = "debit_total_trx_ratio_rolling4"
-    MONTHLY_DEBIT_TOTAL_VOL_RATIO_ROLLING2 = "debit_total_vol_ratio_rolling2"
-    MONTHLY_DEBIT_TOTAL_VOL_RATIO_ROLLING4 = "debit_total_vol_ratio_rolling4"
-
-    # cumulative features
-    CUMULATIVE_FREQUENCY_APPLICATIONS_TO_MONTH = "cumulative_applications"
-    CUMULATIVE_NR_APPLICATIONS_TO_MONTH = "cumulative_nr_applications"
+    AGG_AVG_DELAY_OVERALL = "agg_avg_delay_overall"
+    AGG_COUNT_OVERALL = "agg_count_overall"
+    AGG_AVG_DELAY_TERMINAL = "agg_avg_delay_terminal"
+    AGG_COUNT_TERMINAL = "agg_count_terminal"
+    AGG_AVG_DELAY_REGION = "agg_avg_delay_region"
+    AGG_COUNT_REGION = "agg_count_region"
 
 
 # this is the result of the model exploration done in the notebook (notebooks/model-exploration.ipynb)
 SELECTED_BEST_MODEL_FEATURES = [
-    AggregatedFeatures.MONTHLY_NET_VOLUME_LAG1,
-    AggregatedFeatures.MONTHLY_DEBIT_TOTAL_TRX_RATIO_LAG1,
-    AggregatedFeatures.MONTHLY_DEBIT_TOTAL_VOL_RATIO_LAG1,
-    AggregatedFeatures.MONTHLY_MIN_BALANCE_LAG1,
-    AggregatedFeatures.MONTHLY_BALANCE_RANGE_LAG1,
-    AggregatedFeatures.CUMULATIVE_FREQUENCY_APPLICATIONS_TO_MONTH,
-    AggregatedFeatures.CUMULATIVE_NR_APPLICATIONS_TO_MONTH,
-    RawFeatures.CRG,
+    AggregatedFeatures.AGG_AVG_DELAY_OVERALL,
+    AggregatedFeatures.AGG_COUNT_OVERALL,
+    AggregatedFeatures.AGG_AVG_DELAY_TERMINAL,
+    AggregatedFeatures.AGG_COUNT_TERMINAL,
+    AggregatedFeatures.AGG_AVG_DELAY_REGION,
+    AggregatedFeatures.AGG_COUNT_REGION,
+    RawFeatures.DELAY_PREVIOUS_DAY,
 ]
 
 # this is the result of the model exploration done in the notebook (notebooks/model-exploration.ipynb)
