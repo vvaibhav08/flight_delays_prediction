@@ -1,6 +1,6 @@
 # Flight delay prediction model
 
-Machine learning pipeline for predicting credit applications using transaction data and behavioral patterns of clients.
+Machine learning pipeline for predicting whether a given flight will be delayed or not 2 hours before the scheduled departure.
 
 ## Data Exploration and modelling
 
@@ -47,8 +47,8 @@ abnamro_casestudy/
 
 1. Clone the repository:
 ```bash
-git clone git@github.com:username/abnamro_casestudy.git
-cd abnamro_casestudy
+git clone git@github.com:vvaibhav08/schiphol_assignment.git
+cd schiphol_assignment
 ```
 
 We use Poetry for dependency management under a `Python 3.11` environment. You can follow the steps below to install Poetry. Alternatively the dependencies are listed in `pyproject.toml` and you can install them in your own environment in your preferred manner.
@@ -115,16 +115,4 @@ mlflow ui --backend-store-uri file:./mlruns --host 0.0.0.0 --port 5000
 
 ## Data Requirements
 
-This repository assumes that the dataset fed to the models has the same schema as the one present in `/dataset` folder. The codebase does not contain schema checks hence it must be manually ensured that the input data contain these columns:
-
-- `client_nr`: Client identifier
-- `yearmonth`: Transaction month
-- `total_nr_trx`: Total number of transactions
-- `nr_debit_trx`: Number of debit transactions
-- `volume_debit_trx`: Volume of debit transactions
-- `nr_credit_trx`: Number of credit transactions
-- `volume_credit_trx`: Volume of credit transactions
-- `min_balance`: Minimum balance
-- `max_balance`: Maximum balance
-- `CRG`: Credit rating grade (this is an assumption from my side, I assumed CRG as an indicator of the client risk group)
-- `credit_application`: Target variable (0/1)
+This repository assumes that the dataset fed to the models has the same schema as the one present in `/dataset` folder. The codebase does not contain schema checks hence it must be manually ensured that the input data contain columns defined in the [schiphol flights api](https://developer.schiphol.nl/apis/flight-api/overview?version=latest).
