@@ -48,8 +48,8 @@ abnamro_casestudy/
 │ ├── model_visualizations.py # plotting functions for model performance evaluations
 │ └── constants.py # feature names and model parameters
 ├── dataset/ # Data files (not tracked)
-│ ├── credit_applications.csv
-│ └── customers.csv
+│ ├── flights.csv # not present in the repo cause it is larrrge
+│ └── airports.csv # not present in the repo cause it is larrrge
 ├── configs/ # Configuration files
 │ └── mlflow_config.yml
 ├── notebooks/ # Jupyter notebooks for exploration

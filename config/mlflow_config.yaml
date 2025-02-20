@@ -1,5 +1,5 @@
 mlflow:
-  experiment_name: "loan_application_experiment"
+  experiment_name: "flight_delay_experiment"
   tracking_uri: "file:./mlruns"
   backend_store_uri: "sqlite:///mlflow.db"
   # tracking_uri: "http://127.0.0.1:5000"

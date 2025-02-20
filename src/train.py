@@ -79,11 +79,11 @@ if __name__ == "__main__":
     mlflow_dir = Path("mlruns")
     mlflow_dir.mkdir(exist_ok=True)
 
-    parser = argparse.ArgumentParser(description="train credit application models")
+    parser = argparse.ArgumentParser(description="train flight delays models")
     parser.add_argument(
-        "--flights-data-path", type=Path, default=flights_data_path, help="Path to application data CSV"
+        "--flights-data-path", type=Path, default=flights_data_path, help="Path to flight data CSV"
     )
-    parser.add_argument("--airports-data-path", type=Path, default=airports_data_path, help="Path to customer data CSV")
+    parser.add_argument("--airports-data-path", type=Path, default=airports_data_path, help="Path to airports data CSV")
     parser.add_argument("--config-path", type=Path, default=config_path, help="Path to MLflow config")
     parser.add_argument(
         "--model-type",

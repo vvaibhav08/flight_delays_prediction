@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "flight_delay_prediction_project"
 version = "0.1.0"
-description = "Credit application predictive analysis for ABN AMRO DSI case study"
+description = "Flight delay predictive analysis for Schiphol deep turnaround DS case study"
 authors = ["Vaibhav Vaidya <vaibhavvinayak08@gmail.com>"]
 readme = "README.md"
 

@@ -60,7 +60,7 @@ if __name__ == "__main__":
     airports_data_path = Path("dataset/airports.csv")
     config_path = Path("config/mlflow_config.yaml")
 
-    parser = argparse.ArgumentParser(description="Generate credit application predictions")
+    parser = argparse.ArgumentParser(description="Generate flight delays predictions")
     parser.add_argument("--flights-data-path", type=Path, default=flights_data_path, help="Path to flights data CSV")
     parser.add_argument("--airports-data-path", type=Path, default=airports_data_path, help="Path to airports data CSV")
     parser.add_argument("--config-path", type=Path, default=config_path, help="Path to MLflow config")
