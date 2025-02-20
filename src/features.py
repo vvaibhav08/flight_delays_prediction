@@ -1,75 +1,134 @@
 import pandas as pd
+import numpy as np
 
 from src.constants import AggregatedFeatures, RawFeatures
 
 
 def create_features(
-    df: pd.DataFrame, lags_months: list = [1, 2], rolling_windows_months: list = [2, 4]
+    df: pd.DataFrame, lags_hours: list = [2, 4, 8]
 ) -> pd.DataFrame:
     """
-    Creates time-based features (lag, rolling average) for monthly transaction data.
-    Assumes df has columns: client_nr, yearmonth, volume_debit_trx, volume_credit_trx,
-                            nr_debit_trx, nr_credit_trx, total_nr_trx, min_balance, max_balance.
+    Creates flight delay features based on the EDA steps.
 
-    1. Combined columns are created:
-       - net_volume = volume_credit_trx - volume_debit_trx
-       - debit_total_trx_ratio = nr_debit_trx / total_nr_trx
-       - debit_total_vol_ratio = volume_debit_trx / (volume_debit_trx + volume_credit_trx)
-       - balance_range = max_balance - min_balance
+    Features created:
 
-    2. Sort by (client_nr, yearmonth) to ensure chronological order.
+    1. Temporal Features:
+       - Hour of scheduled departure (RawFeatures.HOUR)
+       - Day of week (RawFeatures.DAY_OF_WEEK)
+       - Schedule date (extracted from RawFeatures.SCHEDULED_DEPARTURE)
 
-    3. For each client_nr group:
-       - For each column in [net_volume, min_balance, debit_total_trx_ratio, debit_total_vol_ratio]:
-         * Create lag features for each value in 'lags' (e.g. col_lag1, col_lag2).
-         * Create rolling average features for each value in 'rolling_windows' (e.g. col_rolling3, col_rolling6).
-           Uses a rolling window on each group's time series.
-    4. Return df with newly added columns.
+    2. Lag Features:
+       - Overall lag features for each lag value in lags_hours:
+         For each flight, computes the average delay (from RawFeatures.DELAY_MINUTES)
+         over a 1‐hour window from (lag+1) to lag hours before scheduled departure,
+         restricted to flights on the same day.
+       - Terminal-specific lag (for a 2-hour lag) computed similarly using RawFeatures.TERMINAL.
 
-    Input
-        df: Input DataFrame with necessary columns.
-        lags_months: List of integers for lag offsets (e.g. [1,2]).
-        rolling_windows_months: List of integers for rolling window sizes (e.g. [2,4]).
-    Returns
-        DataFrame with newly created lag & rolling average features.
+    3. Aggregated (Cumulative) Features:
+       - Overall aggregated features: For flights on the same day (RawFeatures.SCHEDULE_DATE),
+         calculate the cumulative average delay and flight count from the beginning of the day
+         (i.e. midnight) until 2 hours before the flight’s scheduled departure.
+         Results are stored using the keys from AggregatedFeatures.
+       - Analogous aggregated features are computed per terminal and, if available, per region.
+
+    Input:
+      df: DataFrame containing flight data with at least the following columns:
+          • RawFeatures.SCHEDULED_DEPARTURE (datetime)
+          • RawFeatures.DELAY_MINUTES (numeric)
+          • RawFeatures.TERMINAL
+          • Optionally, a region column (RawFeatures.REGION or "region")
+      lags_hours: List of lag hours for computing lag features (default: [2, 4, 8])
+
+    Returns:
+      DataFrame with newly created features.
     """
-
     df = df.copy()
+    df = df.sort_values(RawFeatures.SCHEDULED_DEPARTURE).reset_index(drop=True)
 
-    df[AggregatedFeatures.MONTHLY_NET_VOLUME] = df[RawFeatures.VOLUME_CREDIT_TRX] - df[RawFeatures.VOLUME_DEBIT_TRX]
-    df[AggregatedFeatures.MONTHLY_DEBIT_TOTAL_TRX_RATIO] = df[RawFeatures.NR_DEBIT_TRX] / df[RawFeatures.TOTAL_NR_TRX]
-    df[AggregatedFeatures.MONTHLY_DEBIT_TOTAL_VOL_RATIO] = df[RawFeatures.VOLUME_DEBIT_TRX] / (
-        df[RawFeatures.VOLUME_DEBIT_TRX] + df[RawFeatures.VOLUME_CREDIT_TRX]
-    )
-    df[AggregatedFeatures.MONTHLY_BALANCE_RANGE] = df[RawFeatures.MAX_BALANCE] - df[RawFeatures.MIN_BALANCE]
+    # Ensure scheduledDeparture is datetime
+    if not np.issubdtype(df[RawFeatures.SCHEDULED_DEPARTURE].dtype, np.datetime64):
+        df[RawFeatures.SCHEDULED_DEPARTURE] = pd.to_datetime(df[RawFeatures.SCHEDULED_DEPARTURE])
 
-    df = df.sort_values([RawFeatures.CLIENT_NR, RawFeatures.YEARMONTH]).reset_index(drop=True)
+    # Create temporal features.
+    df[RawFeatures.HOUR] = df[RawFeatures.SCHEDULED_DEPARTURE].dt.hour
+    df[RawFeatures.DAY_OF_WEEK] = df[RawFeatures.SCHEDULED_DEPARTURE].dt.dayofweek
+    # Create scheduleDate from scheduledDeparture
+    df[RawFeatures.SCHEDULE_DATE] = df[RawFeatures.SCHEDULED_DEPARTURE].dt.date
 
-    # Rolling average features
-    time_series_cols = [
-        RawFeatures.MIN_BALANCE,
-        AggregatedFeatures.MONTHLY_NET_VOLUME,
-        AggregatedFeatures.MONTHLY_BALANCE_RANGE,
-        AggregatedFeatures.MONTHLY_DEBIT_TOTAL_TRX_RATIO,
-        AggregatedFeatures.MONTHLY_DEBIT_TOTAL_VOL_RATIO,
-    ]
+    # Overall lag features: average delay in a 1-hour window from (lag+1) to lag hours before departure.
+    def avg_delay_window_overall(current_time, lag_hours):
+        window_start = current_time - pd.Timedelta(hours=lag_hours + 1)
+        window_end = current_time - pd.Timedelta(hours=lag_hours)
+        mask = (
+            (df[RawFeatures.SCHEDULED_DEPARTURE].dt.date == current_time.date()) &
+            (df[RawFeatures.SCHEDULED_DEPARTURE] >= window_start) &
+            (df[RawFeatures.SCHEDULED_DEPARTURE] < window_end)
+        )
+        return df.loc[mask, RawFeatures.DELAY_MINUTES].mean()
 
-    # Group by client_nr for time-based transformations
-    def _create_features_for_group(g: pd.DataFrame) -> pd.DataFrame:
-        g["cumulative_applications"] = (
-            g["credit_application"].shift(1).cumsum()
-        )  # cumulative applications up to the previous month
-        g["cumulative_nr_applications"] = (
-            g["nr_credit_applications"].shift(1).cumsum()
-        )  # cumulative number of applications up to the previous month
-        for col in time_series_cols:
-            # LAGS
-            for lag_val in lags_months:
-                g[f"{col}_lag{lag_val}"] = g[col].shift(lag_val)
-            # ROLLING AVERAGES
-            for w in rolling_windows_months:
-                g[f"{col}_rolling{w}"] = g[col].shift(1).rolling(window=w, min_periods=1).mean()
-        return g
+    for lag in lags_hours:
+        col_name = f"lag_avg_delay_{lag}h_overall"
+        df[col_name] = df[RawFeatures.SCHEDULED_DEPARTURE].apply(lambda t: avg_delay_window_overall(t, lag))
 
-    # Apply this function to each client
-    return df.groupby(RawFeatures.CLIENT_NR, group_keys=False).apply(_create_features_for_group)
+    # Terminal-specific lag feature for 2-hour window (from 3h to 2h before departure)
+    def avg_delay_window_terminal(row):
+        current_time = row[RawFeatures.SCHEDULED_DEPARTURE]
+        terminal = row[RawFeatures.TERMINAL]
+        window_start = current_time - pd.Timedelta(hours=3)
+        window_end = current_time - pd.Timedelta(hours=2)
+        mask = (
+            (df[RawFeatures.SCHEDULED_DEPARTURE].dt.date == current_time.date()) &
+            (df[RawFeatures.TERMINAL] == terminal) &
+            (df[RawFeatures.SCHEDULED_DEPARTURE] >= window_start) &
+            (df[RawFeatures.SCHEDULED_DEPARTURE] < window_end)
+        )
+        return df.loc[mask, RawFeatures.DELAY_MINUTES].mean()
+
+    df["lag_avg_delay_2h_terminal"] = df.apply(avg_delay_window_terminal, axis=1)
+
+    # Aggregated features: computed from start of day until 2 hours before scheduled departure.
+    def compute_cumulative_avg(group):
+        group = group.sort_values(RawFeatures.SCHEDULED_DEPARTURE)
+        avg_delays = []
+        for _, row in group.iterrows():
+            start_of_day = row[RawFeatures.SCHEDULED_DEPARTURE].normalize()
+            cutoff = row[RawFeatures.SCHEDULED_DEPARTURE] - pd.Timedelta(hours=2)
+            earlier = group[
+                (group[RawFeatures.SCHEDULED_DEPARTURE] >= start_of_day) &
+                (group[RawFeatures.SCHEDULED_DEPARTURE] < cutoff)
+            ]
+            if earlier.empty:
+                avg_delay = np.nan
+            else:
+                avg_delay = np.nanmean(earlier[RawFeatures.DELAY_MINUTES])
+            avg_delays.append(avg_delay)
+        return pd.Series(avg_delays, index=group.index)
+
+    def compute_cumulative_count(group):
+        group = group.sort_values(RawFeatures.SCHEDULED_DEPARTURE)
+        counts = []
+        for _, row in group.iterrows():
+            start_of_day = row[RawFeatures.SCHEDULED_DEPARTURE].normalize()
+            cutoff = row[RawFeatures.SCHEDULED_DEPARTURE] - pd.Timedelta(hours=2)
+            earlier = group[
+                (group[RawFeatures.SCHEDULED_DEPARTURE] >= start_of_day) &
+                (group[RawFeatures.SCHEDULED_DEPARTURE] < cutoff)
+            ]
+            counts.append(len(earlier))
+        return pd.Series(counts, index=group.index)
+
+    # Overall aggregated features
+    df[AggregatedFeatures.AGG_AVG_DELAY_OVERALL] = df.groupby(RawFeatures.SCHEDULE_DATE, group_keys=False).apply(compute_cumulative_avg)
+    df[AggregatedFeatures.AGG_COUNT_OVERALL] = df.groupby(RawFeatures.SCHEDULE_DATE, group_keys=False).apply(compute_cumulative_count)
+
+    # Terminal aggregated features
+    df[AggregatedFeatures.AGG_AVG_DELAY_TERMINAL] = df.groupby([RawFeatures.SCHEDULE_DATE, RawFeatures.TERMINAL], group_keys=False).apply(compute_cumulative_avg)
+    df[AggregatedFeatures.AGG_COUNT_TERMINAL] = df.groupby([RawFeatures.SCHEDULE_DATE, RawFeatures.TERMINAL], group_keys=False).apply(compute_cumulative_count)
+
+    # Region aggregated features, if available.
+    region_col = RawFeatures.REGION if RawFeatures.REGION in df.columns else "region"
+    if region_col in df.columns:
+        df[AggregatedFeatures.AGG_AVG_DELAY_REGION] = df.groupby([RawFeatures.SCHEDULE_DATE, region_col], group_keys=False).apply(compute_cumulative_avg)
+        df[AggregatedFeatures.AGG_COUNT_REGION] = df.groupby([RawFeatures.SCHEDULE_DATE, region_col], group_keys=False).apply(compute_cumulative_count)
+
+    return df

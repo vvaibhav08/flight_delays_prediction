@@ -2,7 +2,12 @@ from enum import StrEnum
 
 
 class RawFeatures(StrEnum):
+    ACTUAL_OFF_BLOCK_TIME = "actualOffBlockTime"
+    AIRCRAFT_REGISTRATION = "aircraftRegistration"
+    AIRCRAFT_TYPE_IATAMAIN = "aircraftType.iatamain"
+    AIRCRAFT_TYPE_IATASUB = "aircraftType.iatasub"
     AIRLINE_CODE = "airlineCode"
+    BAGGAGE_CLAIM = "baggageClaim"
     ESTIMATED_LANDING_TIME = "estimatedLandingTime"
     EXPECTED_TIME_BOARDING = "expectedTimeBoarding"
     EXPECTED_TIME_GATE_CLOSING = "expectedTimeGateClosing"
@@ -12,6 +17,7 @@ class RawFeatures(StrEnum):
     FLIGHT_NAME = "flightName"
     FLIGHT_NUMBER = "flightNumber"
     GATE = "gate"
+    ID = "id"
     MAIN_FLIGHT = "mainFlight"
     PREFIX_IATA = "prefixIATA"
     PREFIX_ICAO = "prefixICAO"
@@ -23,25 +29,10 @@ class RawFeatures(StrEnum):
     SERVICE_TYPE = "serviceType"
     TERMINAL = "terminal"
     TRANSFER_POSITIONS = "transferPositions"
-    SCHEDULED_DEPARTURE = "scheduledDeparture"
+    TRANSFER_POSITIONS_TRANSFER = "transferPositions.transferPositions"
+    # Constructed / derived features:
     DELAY_MINUTES = "delay_minutes"
     DELAY_MINUTES_LOG = "delay_minutes_log"
-    NUM_DESTINATIONS = "num_destinations"
-    FIRST_DESTINATION = "first_destination"
-    AIRPORT = "Airport"
-    NAME = "Name"
-    CITY = "City"
-    COUNTRY = "Country"
-    LATITUDE = "Latitude"
-    LONGITUDE = "Longitude"
-    ALTITUDE = "Altitude"
-    TIMEZONE = "Timezone"
-    DST = "DST"
-    TZ = "Tz"
-    TYPE = "Type"
-    SOURCE = "Source"
-    REGION = "region"
-    LOG_DELAY = "log_delay"
     HOUR = "hour"
     DAY_OF_WEEK = "day_of_week"
     DELAY_PREVIOUS_HOUR = "delay_previous_hour"
@@ -50,22 +41,33 @@ class RawFeatures(StrEnum):
 
 
 class AggregatedFeatures(StrEnum):
-    AGG_AVG_DELAY_OVERALL = "agg_avg_delay_overall"
-    AGG_COUNT_OVERALL = "agg_count_overall"
-    AGG_AVG_DELAY_TERMINAL = "agg_avg_delay_terminal"
-    AGG_COUNT_TERMINAL = "agg_count_terminal"
-    AGG_AVG_DELAY_REGION = "agg_avg_delay_region"
-    AGG_COUNT_REGION = "agg_count_region"
+    AGG_DAILY_AVG_DELAY_OVERALL = "daily_2h_prior_avg_delay_overall"
+    AGG_DAILY_COUNT_OVERALL = "daily_2h_prior_count_overall"
+    AGG_DAILY_AVG_DELAY_TERMINAL = "daily_2h_prior_avg_delay_terminal"
+    AGG_DAILY_COUNT_TERMINAL = "daily_2h_prior_count_terminal"
+    AGG_DAILY_AVG_DELAY_REGION = "daily_2h_prior_avg_delay_region"
+    AGG_DAILY_COUNT_REGION = "daily_2h_prior_count_region"
 
 
-# this is the result of the model exploration done in the notebook (notebooks/model-exploration.ipynb)
+# These features were selected in the model exploration notebook.
 SELECTED_BEST_MODEL_FEATURES = [
-    AggregatedFeatures.AGG_AVG_DELAY_OVERALL,
-    AggregatedFeatures.AGG_COUNT_OVERALL,
-    AggregatedFeatures.AGG_AVG_DELAY_TERMINAL,
-    AggregatedFeatures.AGG_COUNT_TERMINAL,
-    AggregatedFeatures.AGG_AVG_DELAY_REGION,
-    AggregatedFeatures.AGG_COUNT_REGION,
+    AggregatedFeatures.AGG_DAILY_AVG_DELAY_OVERALL,
+    AggregatedFeatures.AGG_DAILY_COUNT_OVERALL,
+    AggregatedFeatures.AGG_DAILY_AVG_DELAY_TERMINAL,
+    AggregatedFeatures.AGG_DAILY_COUNT_TERMINAL,
+    AggregatedFeatures.AGG_DAILY_AVG_DELAY_REGION,
+    AggregatedFeatures.AGG_DAILY_COUNT_REGION,
+    RawFeatures.DELAY_PREVIOUS_DAY,
+]
+
+# These features were selected in the model exploration notebook.
+SELECTED_BEST_MODEL_FEATURES = [
+    AggregatedFeatures.AGG_DAILY_AVG_DELAY_OVERALL,
+    AggregatedFeatures.AGG_DAILY_COUNT_OVERALL,
+    AggregatedFeatures.AGG_DAILY_AVG_DELAY_TERMINAL,
+    AggregatedFeatures.AGG_DAILY_COUNT_TERMINAL,
+    AggregatedFeatures.AGG_DAILY_AVG_DELAY_REGION,
+    AggregatedFeatures.AGG_DAILY_COUNT_REGION,
     RawFeatures.DELAY_PREVIOUS_DAY,
 ]
 
