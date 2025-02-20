@@ -1,6 +1,9 @@
 # Flight delay prediction model
 
-Machine learning pipeline for predicting whether a given flight will be delayed or not 2 hours before the scheduled departure.
+Machine learning pipeline for predicting whether a given flight will be delayed or not 2 hours before the scheduled departure. The analysis first defines what delay in flights are, and subsequently defines the target for modelling as a binary variable with the label being 1 when the calculated delay is more than 10 minutes, 0 zero for the delays less than or equal to 10 minutes. All the models are designed to predict whether a flight will be delayed or not 2 hours using information available at-most 2 hours before the scheduled departure of the flight.
+
+We calculated different features taking into various factors into account such that the past delays, the number of flights being flown earlier, static flight features such as the airplane type, terminal, destination region, scheduled day and hour of the flight.
+
 
 ## Data Exploration and modelling
 
@@ -13,10 +16,11 @@ Jupyter notebooks were used for initial data exploration, feature construction a
 In the end, the best performing model had these metrics for the test set:
 
 ```
-=== LightGBM Confusion Matrix (Test) ===
-                 Predicted Negative  Predicted Positive
-Actual Negative                1541               19916
-Actual Positive                 419               11128
+=== LightGBM Classification Report (Test) ===
+              precision    recall  f1-score   support
+
+           0      0.786     0.072     0.132     21457
+           1      0.358     0.964     0.523     11547
 ```
 
 ### Features
@@ -87,7 +91,7 @@ poetry run pre-commit install
 ### Taining
 Train the model
 ```bash
-poetry run python src/train.py --model-type logistic_regression
+poetry run python src/train.py --model-type "random_forest"
 ```
 Available model types:
 `random_forest`, `logistic_regression` (default), and `lightgbm` (check `poetry run python src/train.py --h` for more)
@@ -95,8 +99,8 @@ Available model types:
 ### Prediction
 ```bash
 poetry run python src/predict.py predict \
-    --app_data_path PATH/TO/DATA.csv \
-    --cust_data_path PATH/TO/DATA.csv
+    --flights_data_path PATH/TO/DATA.csv \
+    --airports_data_path PATH/TO/DATA.csv
 ```
 
 ## Development and dependency management

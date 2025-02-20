@@ -8,7 +8,7 @@ from src.constants import RawFeatures
 
 
 def load_csv_data(dataset_path: Path, sep: str = ",") -> pd.DataFrame:
-    return pd.read_csv(dataset_path, sep=sep, index_col=0)
+    return pd.read_csv(dataset_path, sep=sep)
 
 
 def merge_data(df_flights: pd.DataFrame, df_airports: pd.DataFrame) -> pd.DataFrame:

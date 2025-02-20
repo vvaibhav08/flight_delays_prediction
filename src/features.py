@@ -44,6 +44,28 @@ def create_features(df: pd.DataFrame, lags: list = [3, 12, 1]) -> pd.DataFrame:
     """
     df = df.copy()
 
+    df[RawFeatures.SCHEDULED_DEPARTURE] = pd.to_datetime(
+        df[RawFeatures.SCHEDULE_DATE].astype(str) + " " + df[RawFeatures.SCHEDULE_TIME].astype(str)
+    )
+    df[RawFeatures.SCHEDULED_DEPARTURE] = df[RawFeatures.SCHEDULED_DEPARTURE].dt.tz_localize("UTC+01:00")
+    df[RawFeatures.ACTUAL_OFF_BLOCK_TIME] = pd.to_datetime(df[RawFeatures.ACTUAL_OFF_BLOCK_TIME], errors="coerce")
+    df[RawFeatures.SCHEDULED_DEPARTURE] = pd.to_datetime(
+        df[RawFeatures.SCHEDULE_DATE].astype(str) + " " + df[RawFeatures.SCHEDULE_TIME].astype(str)
+    )
+    df[RawFeatures.SCHEDULED_DEPARTURE] = df[RawFeatures.SCHEDULED_DEPARTURE].dt.tz_localize("UTC+01:00")
+    df[RawFeatures.ACTUAL_OFF_BLOCK_TIME] = pd.to_datetime(df[RawFeatures.ACTUAL_OFF_BLOCK_TIME], errors="coerce")
+    df[RawFeatures.DELAY_MINUTES] = (
+        df[RawFeatures.ACTUAL_OFF_BLOCK_TIME] - df[RawFeatures.SCHEDULED_DEPARTURE]
+    ).dt.total_seconds() / 60
+
+    raw_data_len = len(df)
+    print(f"Total flights before dropping NA delays: {raw_data_len}")
+    df.dropna(subset=[RawFeatures.DELAY_MINUTES], inplace=True)
+    print(f"Total flights after dropping NA delays: {raw_data_len - len(df)}")
+    print(f"Percentage of entries dropped: {(1 - len(df) / raw_data_len) * 100:.2f}%")
+
+    df[RawFeatures.DELAY_MINUTES] = df[RawFeatures.DELAY_MINUTES].apply(lambda x: x if x > 0 else 0)
+
     # Create "scheduledDeparture" if not already present.
     if RawFeatures.SCHEDULED_DEPARTURE not in df.columns:
         df[RawFeatures.SCHEDULED_DEPARTURE] = pd.to_datetime(
@@ -51,10 +73,6 @@ def create_features(df: pd.DataFrame, lags: list = [3, 12, 1]) -> pd.DataFrame:
         )
 
     df = df.sort_values(RawFeatures.SCHEDULED_DEPARTURE).reset_index(drop=True)
-
-    # Ensure scheduledDeparture is datetime.
-    if not np.issubdtype(df[RawFeatures.SCHEDULED_DEPARTURE].dtype, np.datetime64):
-        df[RawFeatures.SCHEDULED_DEPARTURE] = pd.to_datetime(df[RawFeatures.SCHEDULED_DEPARTURE])
 
     # Create temporal features.
     df[RawFeatures.SCHEDULED_HOUR] = df[RawFeatures.SCHEDULED_DEPARTURE].dt.hour
@@ -88,6 +106,8 @@ def create_features(df: pd.DataFrame, lags: list = [3, 12, 1]) -> pd.DataFrame:
         "target_bin_1d",
     ]
     df.drop(columns=cols_to_drop, inplace=True)
+
+    print(f"Calculating temporal lag and aggregate features. This takes a few minutes...")
 
     # These functions compute the cumulative (aggregated) average delay and count
     # for flights on the same day up to (scheduledDeparture - 2 hours).

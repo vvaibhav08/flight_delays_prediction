@@ -42,10 +42,9 @@ def train_model(
 
     df_flights_with_regions = merge_data(df_flights, df_airports)
 
+    df = create_features(df_flights_with_regions)
     if RawFeatures._DELAY_TARGET not in df_flights_with_regions.columns:
         raise ValueError(f"No target '{RawFeatures._DELAY_TARGET}' column found in dataset.")
-
-    df = create_features(df_flights_with_regions)
     features = SELECTED_BEST_MODEL_FEATURES
     df = df.dropna(subset=features + [RawFeatures._DELAY_TARGET])
 
@@ -54,11 +53,11 @@ def train_model(
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
 
+    print(f"starting training run for model: {model_type}")
     with mlflow.start_run():
         pipeline = _get_model_pipeline(model_type)
         mlflow.log_param("model_type", model_type)
         mlflow.log_param("features", features)
-
         pipeline.fit(X_train, y_train)
         y_pred_train = pipeline.predict(X_train)
         y_pred_test = pipeline.predict(X_test)

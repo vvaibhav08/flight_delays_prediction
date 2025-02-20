@@ -1,8 +1,8 @@
 import matplotlib.pyplot as plt
+import pandas as pd
 import plotly.graph_objects as go
 import shap
 from sklearn.metrics import auc, roc_curve
-import pandas as pd
 
 
 def plot_roc_curve(y_true, y_pred_proba, title_prefix=""):
@@ -55,7 +55,7 @@ def plot_roc_curves(y_true, model_predictions: dict, title="ROC Curves Compariso
 def plot_shap_importance(pipeline, X, feature_names=None):
     model = pipeline.steps[-1][1]
     X_transformed = pipeline[:-1].transform(X)
-    
+
     if feature_names is None:
         try:
             feature_names = pipeline[:-1].get_feature_names_out()
@@ -64,9 +64,9 @@ def plot_shap_importance(pipeline, X, feature_names=None):
                 feature_names = X_transformed.columns.tolist()
             else:
                 feature_names = [f"feature_{i}" for i in range(X_transformed.shape[1])]
-    
+
     explainer = shap.Explainer(model, X_transformed, feature_names=feature_names)
     shap_values = explainer(X_transformed)
-    
+
     shap.plots.beeswarm(shap_values)
     return plt.gcf()

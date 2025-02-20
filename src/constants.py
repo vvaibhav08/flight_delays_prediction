@@ -85,6 +85,7 @@ RANDOM_FOREST_PARAMS = {
 
 # Best parameters for LightGBM
 LIGHTGBM_PARAMS = {
+    "max_depth": 10,
     "learning_rate": 0.005,
     "n_estimators": 200,
     "random_state": 42,
@@ -97,7 +98,7 @@ LIGHTGBM_PARAMS = {
 
 MODEL_PIPELINE_STEP_ARGUMENTS = {
     "imputer__strategy": "mean",
-    "outlier_clip__factor": 7.0,
+    "outlier_clip__factor": 5.0,
     "scaler__with_mean": True,
     "scaler__with_std": True,
     "var_thresh__threshold": 0.0,
