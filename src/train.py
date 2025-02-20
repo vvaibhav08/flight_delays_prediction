@@ -43,7 +43,7 @@ def train_model(
     df_flights_with_regions = merge_data(df_flights, df_airports)
 
     df = create_features(df_flights_with_regions)
-    if RawFeatures._DELAY_TARGET not in df_flights_with_regions.columns:
+    if RawFeatures._DELAY_TARGET not in df.columns:
         raise ValueError(f"No target '{RawFeatures._DELAY_TARGET}' column found in dataset.")
     features = SELECTED_BEST_MODEL_FEATURES
     df = df.dropna(subset=features + [RawFeatures._DELAY_TARGET])

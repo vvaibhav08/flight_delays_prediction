@@ -167,4 +167,6 @@ def create_features(df: pd.DataFrame, lags: list = [3, 12, 1]) -> pd.DataFrame:
     # Create the binary target: 0 if delay_minutes <= 10, else 1.
     df[RawFeatures._DELAY_TARGET] = df[RawFeatures.DELAY_MINUTES].apply(lambda x: 0 if x <= 10 else 1)
 
+    df.columns = [col.value if hasattr(col, "value") else col for col in df.columns]
+
     return df
