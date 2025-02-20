@@ -6,6 +6,19 @@ Machine learning pipeline for predicting whether a given flight will be delayed 
 
 Jupyter notebooks were used for initial data exploration, feature construction and modelling. The notebooks can be found in `notebooks/`.
 
+1. In `EDA.ipynb` we explore the data, and experiment with various features.
+2. In `model_exploration.ipynb` we explore different modelling strategies by trying different features, and hyperparameters for 3 classifier models.
+
+
+In the end, the best performing model had these metrics for the test set:
+
+```
+=== LightGBM Confusion Matrix (Test) ===
+                 Predicted Negative  Predicted Positive
+Actual Negative                1541               19916
+Actual Positive                 419               11128
+```
+
 ### Features
 
 - Automated feature engineering pipeline

@@ -31,12 +31,11 @@ class RawFeatures(StrEnum):
     TRANSFER_POSITIONS = "transferPositions"
     TRANSFER_POSITIONS_TRANSFER = "transferPositions.transferPositions"
     # Constructed / derived features:
+    DEPARTURE_REGION = "region"
     DELAY_MINUTES = "delay_minutes"
-    DELAY_MINUTES_LOG = "delay_minutes_log"
-    HOUR = "hour"
-    DAY_OF_WEEK = "day_of_week"
-    DELAY_PREVIOUS_HOUR = "delay_previous_hour"
-    DELAY_PREVIOUS_DAY = "delay_previous_day"
+    SCHEDULED_DEPARTURE = "scheduledDeparture"
+    SCHEDULED_HOUR = "hour"
+    SCHEDULED_DAY_OF_WEEK = "day_of_week"
     _DELAY_TARGET = "delay_target"
 
 
@@ -47,28 +46,27 @@ class AggregatedFeatures(StrEnum):
     AGG_DAILY_COUNT_TERMINAL = "daily_2h_prior_count_terminal"
     AGG_DAILY_AVG_DELAY_REGION = "daily_2h_prior_avg_delay_region"
     AGG_DAILY_COUNT_REGION = "daily_2h_prior_count_region"
+    AGG_LAG_DELAY_2H_OVERALL = "lag_avg_delay_2h_overall"
+    AGG_LAG_DELAY_12H_OVERALL = "lag_avg_delay_12h_overall"
+    AGG_LAG_DELAY_1D_OVERALL = "lag_avg_delay_1d_overall"
 
 
 # These features were selected in the model exploration notebook.
 SELECTED_BEST_MODEL_FEATURES = [
+    RawFeatures.TERMINAL,
+    RawFeatures.SERVICE_TYPE,
+    RawFeatures.DEPARTURE_REGION,
+    RawFeatures.SCHEDULED_HOUR,
+    RawFeatures.SCHEDULED_DAY_OF_WEEK,
+    AggregatedFeatures.AGG_LAG_DELAY_2H_OVERALL,
+    AggregatedFeatures.AGG_LAG_DELAY_12H_OVERALL,
+    AggregatedFeatures.AGG_LAG_DELAY_1D_OVERALL,
     AggregatedFeatures.AGG_DAILY_AVG_DELAY_OVERALL,
     AggregatedFeatures.AGG_DAILY_COUNT_OVERALL,
     AggregatedFeatures.AGG_DAILY_AVG_DELAY_TERMINAL,
     AggregatedFeatures.AGG_DAILY_COUNT_TERMINAL,
     AggregatedFeatures.AGG_DAILY_AVG_DELAY_REGION,
     AggregatedFeatures.AGG_DAILY_COUNT_REGION,
-    RawFeatures.DELAY_PREVIOUS_DAY,
-]
-
-# These features were selected in the model exploration notebook.
-SELECTED_BEST_MODEL_FEATURES = [
-    AggregatedFeatures.AGG_DAILY_AVG_DELAY_OVERALL,
-    AggregatedFeatures.AGG_DAILY_COUNT_OVERALL,
-    AggregatedFeatures.AGG_DAILY_AVG_DELAY_TERMINAL,
-    AggregatedFeatures.AGG_DAILY_COUNT_TERMINAL,
-    AggregatedFeatures.AGG_DAILY_AVG_DELAY_REGION,
-    AggregatedFeatures.AGG_DAILY_COUNT_REGION,
-    RawFeatures.DELAY_PREVIOUS_DAY,
 ]
 
 # this is the result of the model exploration done in the notebook (notebooks/model-exploration.ipynb)

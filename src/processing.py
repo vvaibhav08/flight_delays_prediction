@@ -11,8 +11,32 @@ def load_csv_data(dataset_path: Path, sep: str = ",") -> pd.DataFrame:
     return pd.read_csv(dataset_path, sep=sep, index_col=0)
 
 
-def merge_data(df_app: pd.DataFrame, df_cust: pd.DataFrame) -> pd.DataFrame:
-    return pd.merge(df_app, df_cust, on=[RawFeatures.CLIENT_NR, RawFeatures.YEARMONTH], how="inner")
+def merge_data(df_flights: pd.DataFrame, df_airports: pd.DataFrame) -> pd.DataFrame:
+    """
+        Merge the processed flight data with the airport data using a left join,
+       matching df_flights['first_destination'] to df_airports['IATA']. Drop rows with missing IATA codes.
+        Extract the top-level region from the 'Tz' column in the merged DataFrame.
+       For example, "Europe/Paris" will be split to "Europe".
+
+    Returns:
+        Merged DataFrame with additional columns: 'num_destinations', 'first_destination' and 'region'.
+    """
+    df_flights["num_destinations"] = df_flights[RawFeatures.ROUTE_DESTINATIONS].apply(
+        lambda x: len(eval(x)) if isinstance(x, str) else 0
+    )
+    df_flights["first_destination"] = df_flights[RawFeatures.ROUTE_DESTINATIONS].apply(
+        lambda x: eval(x)[0] if isinstance(x, str) and len(eval(x)) > 0 else None
+    )
+
+    # Merge flights with airports on the first destination and IATA, dropping rows with missing IATA.
+    df_merged = pd.merge(
+        df_flights, df_airports, how="left", left_on="first_destination", right_on="IATA", suffixes=("", "_airport")
+    ).dropna(subset=["IATA"])
+
+    # Extract top-level region from the Tz column (e.g., "Europe/Paris" -> "Europe")
+    df_merged["region"] = df_merged["Tz"].str.split("/").str.get(0)
+
+    return df_merged
 
 
 class IQRClipper(BaseEstimator, TransformerMixin):

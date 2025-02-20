@@ -25,8 +25,8 @@ def _get_model_pipeline(model_type: str):
 
 
 def train_model(
-    app_data_path: Path = Path("../data/application_data.csv"),
-    cust_data_path: Path = Path("../data/customer_data.csv"),
+    flights_data_path: Path = Path("../data/flights.csv"),
+    airports_data_path: Path = Path("../data/airports.csv"),
     config_path: Path = Path("../config/mlflow_config.yml"),
     model_type: str = "logistic_regression",
 ):
@@ -37,19 +37,20 @@ def train_model(
     mlflow.set_experiment(config["mlflow"]["experiment_name"])
 
     # Load and merge data
-    df_app = load_csv_data(app_data_path)
-    df_cust = load_csv_data(cust_data_path)
-    df = merge_data(df_app, df_cust)
+    df_flights = load_csv_data(flights_data_path)
+    df_airports = load_csv_data(airports_data_path)
 
-    if RawFeatures._CREDIT_APPLICATION not in df.columns:
-        raise ValueError(f"No '{RawFeatures._CREDIT_APPLICATION}' column found in dataset.")
+    df_flights_with_regions = merge_data(df_flights, df_airports)
 
-    df = create_features(df)
+    if RawFeatures._DELAY_TARGET not in df_flights_with_regions.columns:
+        raise ValueError(f"No target '{RawFeatures._DELAY_TARGET}' column found in dataset.")
+
+    df = create_features(df_flights_with_regions)
     features = SELECTED_BEST_MODEL_FEATURES
-    df = df.dropna(subset=features + [RawFeatures._CREDIT_APPLICATION])
+    df = df.dropna(subset=features + [RawFeatures._DELAY_TARGET])
 
     X = df[features]
-    y = df[RawFeatures._CREDIT_APPLICATION]
+    y = df[RawFeatures._DELAY_TARGET]
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
 
@@ -71,8 +72,8 @@ if __name__ == "__main__":
     import argparse
 
     base_dir = Path(__file__).parent
-    app_data_path = Path("dataset/credit_applications.csv")
-    cust_data_path = Path("dataset/customers.csv")
+    flights_data_path = Path("dataset/flights.csv")
+    airports_data_path = Path("dataset/airports.csv")
     config_path = Path("config/mlflow_config.yaml")
     model_type = "logistic_regression"
 
@@ -80,8 +81,10 @@ if __name__ == "__main__":
     mlflow_dir.mkdir(exist_ok=True)
 
     parser = argparse.ArgumentParser(description="train credit application models")
-    parser.add_argument("--app-data-path", type=Path, default=app_data_path, help="Path to application data CSV")
-    parser.add_argument("--cust-data-path", type=Path, default=cust_data_path, help="Path to customer data CSV")
+    parser.add_argument(
+        "--flights-data-path", type=Path, default=flights_data_path, help="Path to application data CSV"
+    )
+    parser.add_argument("--airports-data-path", type=Path, default=airports_data_path, help="Path to customer data CSV")
     parser.add_argument("--config-path", type=Path, default=config_path, help="Path to MLflow config")
     parser.add_argument(
         "--model-type",
@@ -93,8 +96,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     train_model(
-        app_data_path=args.app_data_path,
-        cust_data_path=args.cust_data_path,
+        flights_data_path=args.flights_data_path,
+        airports_data_path=args.airports_data_path,
         config_path=args.config_path,
         model_type=args.model_type,
     )
