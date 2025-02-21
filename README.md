@@ -37,7 +37,7 @@ In the end, the best performing model had these metrics for the test set:
 
 ## Repository Structure
 ```
-abnamro_casestudy/
+schiphol_casestudy/
 ├── src/
 │ ├── models.py # Model classes and pipeline definitions
 │ ├── features.py # Feature engineering functions
@@ -68,6 +68,11 @@ git clone git@github.com:vvaibhav08/schiphol_assignment.git
 cd schiphol_assignment
 ```
 
+### Data
+Place the airports and flights data as csv files in the dataset folder.
+
+
+### Environment
 We use Poetry for dependency management under a `Python 3.11` environment. You can follow the steps below to install Poetry. Alternatively the dependencies are listed in `pyproject.toml` and you can install them in your own environment in your preferred manner.
 
 
